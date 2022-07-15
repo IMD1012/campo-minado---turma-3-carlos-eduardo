@@ -153,8 +153,11 @@ void wincheck(campo campo[lt][ct]){
 
 //função que recebe o input de linha/coluna e altera o campo
 int revelar(int l, int c, campo campo[lt][ct]){
-    reveladas++;
-    printf("%d\n", reveladas);
+    if(campo[l][c].status==0){
+        reveladas++;
+    }else if(campo[l][c].status==1){
+        printf("Coordenada ja revelada.\n");
+    }
 
     if(campo[l][c].numero!=0 && campo[l][c].mina==0){ //se o índice for um número, somente ele é revelado
         campo[l][c].status=1;
