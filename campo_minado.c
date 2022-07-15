@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-int endgame = 0;
+int endgame = 0, reveladas = 0;
 //lt = linhas totais
 //ct = colunas totais
 //Mude os números abaixos para alterar no programa inteiro
@@ -96,7 +96,9 @@ void printar(campo campo[lt][ct]){
     //imprime o número de colunas
     printf("   ");
     for(i=0;i<ct;i++){
-        if(i==ct-1){
+        if(i<10 && i==ct-1){
+            printf(" %d\n", i+1);
+        }else if(i==ct-1){
             printf("%d\n", i+1);
         }else if(i+1>=10){
             printf("%d ", i+1);
@@ -140,8 +142,19 @@ void printar(campo campo[lt][ct]){
     }
 }
 
+//função que checa se a condição de vitória foi alcançada
+void wincheck(campo campo[lt][ct]){
+    if(reveladas==(lt*ct)-minas){
+        endgame = 1;
+        printar(campo);
+        printf("Vitoria! Todas as minas foram evitadas.\n");
+    }
+}
+
 //função que recebe o input de linha/coluna e altera o campo
 int revelar(int l, int c, campo campo[lt][ct]){
+    reveladas++;
+    printf("%d\n", reveladas);
 
     if(campo[l][c].numero!=0 && campo[l][c].mina==0){ //se o índice for um número, somente ele é revelado
         campo[l][c].status=1;
@@ -150,7 +163,7 @@ int revelar(int l, int c, campo campo[lt][ct]){
         campo[l][c].status=1;
         endgame = 1;
         printar(campo);
-        printf("GAME OVER\n");
+        printf("GAME OVER! Voce acertou uma mina.\n");
         return 0;
     }else if(campo[l][c].numero==0){
         campo[l][c].status=1;
@@ -197,6 +210,7 @@ void initJogo(campo campo[lt][ct]){
         }else{
             revelar(input1, input2, campo);
         }
+        wincheck(campo);
     }
 }
 
