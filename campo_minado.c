@@ -93,6 +93,7 @@ void initCampo(campo campo[lt][ct]){
 void printar(campo campo[lt][ct]){
     int i, j, cont = 1;
 
+    //imprime o número de colunas
     printf("   ");
     for(i=0;i<ct;i++){
         if(i==ct-1){
@@ -104,6 +105,7 @@ void printar(campo campo[lt][ct]){
         }
     }
 
+    //imprime o número de linhas
     for(i=0;i<lt;i++){
         if(cont<10){
             printf(" %d", cont);
@@ -112,45 +114,88 @@ void printar(campo campo[lt][ct]){
         }
         cont++;
 
-        for(j=0;j<ct;j++){
-            if(campo[i][j].status == 0){
-                printf("|__");
-            }else if(campo[i][j].mina == 1){
-                printf("|_X", campo[i][j].numero);
-            }else{
-                printf("|_%d", campo[i][j].numero);
+        //e o campo em si (ao acertar uma mina todas as minas são expostas)
+        if(endgame==0){
+            for(j=0;j<ct;j++){
+                if(campo[i][j].status == 0){
+                    printf("|__");
+                }else if(campo[i][j].mina == 1){
+                    printf("|_X");
+                }else{
+                    printf("|_%d", campo[i][j].numero);
+                }
+            }
+        }else{
+            for(j=0;j<ct;j++){
+                if(campo[i][j].mina == 1){
+                    printf("|_X");
+                }else if(campo[i][j].status == 0){
+                    printf("|__");
+                }else{
+                    printf("|_%d", campo[i][j].numero);
+                }
             }
         }
         printf("\n");
     }
 }
 
+//função que recebe o input de linha/coluna e altera o campo
+int revelar(int l, int c, campo campo[lt][ct]){
+
+    if(campo[l][c].numero!=0 && campo[l][c].mina==0){ //se o índice for um número, somente ele é revelado
+        campo[l][c].status=1;
+        return 0;
+    }else if(campo[l][c].mina==1){ //se o índice for uma mina, ela é revelada e o jogo acaba
+        campo[l][c].status=1;
+        endgame = 1;
+        printar(campo);
+        printf("GAME OVER\n");
+        return 0;
+    }else if(campo[l][c].numero==0){
+        campo[l][c].status=1;
+        if(valid(l-1, c-1) && campo[l-1][c-1].status==0){
+            revelar(l-1, c-1, campo);
+        }
+        if(valid(l-1, c) && campo[l-1][c].status==0){
+            revelar(l-1, c, campo);
+        }
+        if(valid(l-1, c+1) && campo[l-1][c+1].status==0){
+            revelar(l-1, c+1, campo);
+        }
+        if(valid(l, c-1) && campo[l][c-1].status==0){
+            revelar(l, c-1, campo);
+        }
+        if(valid(l, c+1) && campo[l][c+1].status==0){
+            revelar(l, c+1, campo);
+        }
+        if(valid(l+1, c-1) && campo[l+1][c-1].status==0){
+            revelar(l+1, c-1, campo);
+        }
+        if(valid(l+1, c) && campo[l+1][c].status==0){
+            revelar(l+1, c, campo);
+        }
+        if(valid(l+1, c+1) && campo[l+1][c+1].status==0){
+            revelar(l+1, c+1, campo);
+        }
+    }
+    return 0;
+}
+
 //função que inicia a partida
 void initJogo(campo campo[lt][ct]){
     int input1, input2;
-    initCampo(campo);
 
     while(endgame==0){
         printar(campo);
-        int pass = 0;
-
-        
         scanf("%d %d", &input1, &input2);
-        if(input1>0){
-            input1--;
-        }
-        if(input2>0){
-            input2--;
-        }
-            
+        input1--;
+        input2--;
 
-        if(campo[input1][input2].mina == 1){
-            campo[input1][input2].status = 1;
-            printar(campo);
-            printf("GAME OVER\n");
-            endgame = 1;
+        if(valid(input1, input2)==0){
+            printf("Coordenada invalida!\n");
         }else{
-            campo[input1][input2].status = 1;
+            revelar(input1, input2, campo);
         }
     }
 }
@@ -158,6 +203,7 @@ void initJogo(campo campo[lt][ct]){
 int main(){
     campo campo[lt][ct];
 
+    initCampo(campo);
     initJogo(campo);
 
     return 0;
