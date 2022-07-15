@@ -2,53 +2,245 @@
 #include <stdlib.h>
 #include <time.h>
 
+int endgame = 0, reveladas = 0;
+//lt = linhas totais
+//ct = colunas totais
+//Mude os números abaixos para alterar no programa inteiro
+int lt = 10, ct = 20, minas = 40;
+
+//TIMER
+time_t start,end;
+
+//índices do campo: status de aberto/fechado, status de é mina/não é e número correspondente a quantia de minas ao seu redor
 typedef struct{
     int status;
-    int bomba;
+    int mina;
     int numero;
 }campo;
 
-void init(int l, int c, campo campo[l][c]){
-    int i, j;
-    for(i=0;i<l;i++){
-        for(j=0;j<c;j++){
+//função que checa se um índice chamado está dentro do campo
+int valid(int l, int c){
+    if(l>=0 && l<lt && c>=0 && c<ct){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
+//função que conta quantas bombas há nas 8 casas ao redor de um índice e retorna a quantia
+int quantbombas(int l, int c, campo campo[lt][ct]){
+    int n=0;
+    
+    if(valid(l-1, c-1) && campo[l-1][c-1].mina==1){
+        n++;
+    }
+    if(valid(l-1, c) && campo[l-1][c].mina==1){
+        n++;
+    }
+    if(valid(l-1, c+1) && campo[l-1][c+1].mina==1){
+        n++;
+    }
+    if(valid(l, c-1) && campo[l][c-1].mina==1){
+        n++;
+    }
+    if(valid(l, c+1) && campo[l][c+1].mina==1){
+        n++;
+    }
+    if(valid(l+1, c-1) && campo[l+1][c-1].mina==1){
+        n++;
+    }
+    if(valid(l+1, c) && campo[l+1][c].mina==1){
+        n++;
+    }
+    if(valid(l+1, c+1) && campo[l+1][c+1].mina==1){
+        n++;
+    }
+    
+   return n;
+}
+
+//função que inicia o campo
+void initCampo(campo campo[lt][ct]){
+    int i, j, lrand, crand;
+
+    //primeiro inicia todos os índices do struct do campo como 0 para ter a base
+    for(i=0;i<lt;i++){
+        for(j=0;j<ct;j++){
             campo[i][j].status = 0;
-            campo[i][j].bomba = 0;
+            campo[i][j].mina = 0;
             campo[i][j].numero = 0;
         }
     }
-}
 
-void bombas(int l, int c, campo campo[l][c]){
-    int i=0, lrand, crand;
+    //depois distribui as X bombas
+    i = 0;
     srand(time(NULL));
-    while(i!=40){
-        lrand = rand()%10;
-        crand = rand()%20;
-        if(campo[lrand][crand].bomba == 0){
-            campo[lrand][crand].bomba = 1;
+    while(i!=minas){
+        lrand = rand()%lt;
+        crand = rand()%ct;
+        if(campo[lrand][crand].mina == 0){
+            campo[lrand][crand].mina = 1;
             i++;
+        }
+    }
+
+    //e por último transforma as casas que não viraram bombas em números correspondentes a quantidade de bombas vizinhas
+    for(i=0;i<lt;i++){
+        for(j=0;j<ct;j++){
+            campo[i][j].numero = quantbombas(i, j, campo);
         }
     }
 }
 
-void printar(int l, int c, campo campo[l][c]){
-    int i, j, cont = 0;
-    for(i=0;i<l;i++){
-        for(j=0;j<c;j++){
-            printf("%d ", campo[i][j].bomba);
+//função para printar o campo gerado
+void printar(campo campo[lt][ct]){
+    int i, j, cont = 1;
+
+    //imprime o número de colunas
+    printf("   ");
+    for(i=0;i<ct;i++){
+        if(i<10 && i==ct-1){
+            printf(" %d\n", i+1);
+        }else if(i==ct-1){
+            printf("%d\n", i+1);
+        }else if(i+1>=10){
+            printf("%d ", i+1);
+        }else{
+            printf(" %d ", i+1);
+        }
+    }
+
+    //imprime o número de linhas
+    for(i=0;i<lt;i++){
+        if(cont<10){
+            printf(" %d", cont);
+        }else{
+            printf("%d", cont);
+        }
+        cont++;
+
+        //e o campo em si (ao acertar uma mina todas as minas são expostas)
+        if(endgame==0){
+            for(j=0;j<ct;j++){
+                if(campo[i][j].status == 0){
+                    printf("|__");
+                }else if(campo[i][j].mina == 1){
+                    printf("|_X");
+                }else{
+                    printf("|_%d", campo[i][j].numero);
+                }
+            }
+        }else{
+            for(j=0;j<ct;j++){
+                if(campo[i][j].mina == 1){
+                    printf("|_X");
+                }else if(campo[i][j].status == 0){
+                    printf("|__");
+                }else{
+                    printf("|_%d", campo[i][j].numero);
+                }
+            }
         }
         printf("\n");
     }
 }
 
+//função que checa se a condição de vitória foi alcançada
+void wincheck(campo campo[lt][ct]){
+    if(reveladas==(lt*ct)-minas){
+        endgame = 1;
+        printar(campo);
+        printf("Vitoria! Todas as minas foram evitadas.\n");
+    }
+}
+
+//função que recebe o input de linha/coluna e altera o campo
+int revelar(int l, int c, campo campo[lt][ct]){
+    if(campo[l][c].status==0){
+        reveladas++;
+    }else if(campo[l][c].status==1){
+        printf("Coordenada ja revelada.\n");
+    }
+
+    if(campo[l][c].numero!=0 && campo[l][c].mina==0){ //se o índice for um número, somente ele é revelado
+        campo[l][c].status=1;
+        return 0;
+    }else if(campo[l][c].mina==1){ //se o índice for uma mina, ela é revelada e o jogo acaba
+        campo[l][c].status=1;
+        endgame = 1;
+        printar(campo);
+        printf("GAME OVER! Voce acertou uma mina.\n");
+        return 0;
+    }else if(campo[l][c].numero==0){
+        campo[l][c].status=1;
+        if(valid(l-1, c-1) && campo[l-1][c-1].status==0){
+            revelar(l-1, c-1, campo);
+        }
+        if(valid(l-1, c) && campo[l-1][c].status==0){
+            revelar(l-1, c, campo);
+        }
+        if(valid(l-1, c+1) && campo[l-1][c+1].status==0){
+            revelar(l-1, c+1, campo);
+        }
+        if(valid(l, c-1) && campo[l][c-1].status==0){
+            revelar(l, c-1, campo);
+        }
+        if(valid(l, c+1) && campo[l][c+1].status==0){
+            revelar(l, c+1, campo);
+        }
+        if(valid(l+1, c-1) && campo[l+1][c-1].status==0){
+            revelar(l+1, c-1, campo);
+        }
+        if(valid(l+1, c) && campo[l+1][c].status==0){
+            revelar(l+1, c, campo);
+        }
+        if(valid(l+1, c+1) && campo[l+1][c+1].status==0){
+            revelar(l+1, c+1, campo);
+        }
+    }
+    return 0;
+}
+
+//função que inicia a partida
+void initJogo(campo campo[lt][ct]){
+  
+    int input1, input2, menu;
+    while(endgame==0){
+        printar(campo);
+
+        printf("Digite:\n1 coordenadas\n2 tempo de jogo\n3 sugestão\n");
+        scanf("%d", &menu);
+
+        if (menu == 1) {
+          scanf("%d %d", &input1, &input2);
+          input1--;
+          input2--;
+
+          if(valid(input1, input2)==0){
+            printf("Coordenada invalida!\n");
+          }
+          else{
+            revelar(input1, input2, campo);
+          }
+          wincheck(campo);
+        }
+        else if (menu == 2) {
+          end = time(NULL);
+          printf("Tempo de jogo: %ld segundos\n", end - start);
+        }
+
+    }
+}
+
 int main(){
-    int l = 10, c = 20;
-    campo oculto[l][c];
+    campo campo[lt][ct];
 
-    init(l, c, oculto);
-    bombas(l, c, oculto);
-    printar(l, c, oculto);
+    initCampo(campo);
 
+    start = time(NULL);
+    initJogo(campo);
+  
+    end = time(NULL);
+    printf("Tempo de jogo: %ld segundos", end - start);
     return 0;
 }
