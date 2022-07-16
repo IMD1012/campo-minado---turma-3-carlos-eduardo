@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-int endgame = 0, reveladas = 0;
+//definição de algumas variáveis globais necessárias para o programa, NÃO MEXER
+int endgame = 0, reveladas = 0, init1, init2;;
+time_t start,end;
+
 //lt = linhas totais
 //ct = colunas totais
 //Mude os números abaixos para alterar no programa inteiro
-int lt = 10, ct = 20, minas = 40, init1, init2;
-
-//TIMER
-time_t start,end;
+int lt = 10, ct = 20, minas = 40;
 
 //índices do campo: status de aberto/fechado, status de é mina/não é e número correspondente a quantia de minas ao seu redor
 typedef struct{
@@ -214,7 +214,7 @@ int revelar(int l, int c, campo campo[lt][ct]){
 
 //função que inicia a partida
 void initJogo(campo campo[lt][ct]){
-    int input1, input2, i, j, cont = 1;
+    int input1, input2, i, j, cont = 1, menu;
 
     printf("   ");
     for(i=0;i<ct;i++){
@@ -253,16 +253,25 @@ void initJogo(campo campo[lt][ct]){
   
     while(endgame==0){
         printar(campo);
-        scanf("%d %d", &input1, &input2);
-        input1--;
-        input2--;
-
-        if(valid(input1, input2)==0){
-            printf("Coordenada invalida!\n");
-        }else{
-            revelar(input1, input2, campo);
+        printf("Digite:\n1 coordenadas\n2 tempo de jogo\n3 sugestão\n");
+        scanf("%d", &menu);
+        
+        if(menu == 1){
+            printf("Insira as coordenadas: ");
+            scanf("%d %d", &input1, &input2);
+            input1--;
+            input2--;
+            if(valid(input1, input2)==0){
+                printf("Coordenada invalida!\n");
+            }else{
+                revelar(input1, input2, campo);
+                wincheck(campo);
+            }
         }
-        wincheck(campo);
+        else if (menu == 2) {
+          end = time(NULL);
+          printf("Tempo de jogo: %ld segundos\n", end - start);
+        }
     }
 }
 
@@ -270,7 +279,7 @@ int main(){
     campo campo[lt][ct];
 
     initJogo(campo);
-  
+
     end = time(NULL);
     printf("Tempo de jogo: %ld segundos", end - start);
     return 0;
