@@ -6,7 +6,7 @@ int endgame = 0, reveladas = 0;
 //lt = linhas totais
 //ct = colunas totais
 //Mude os números abaixos para alterar no programa inteiro
-int lt = 10, ct = 20, minas = 40;
+int lt = 10, ct = 20, minas = 40, init1, init2;
 
 //índices do campo: status de aberto/fechado, status de é mina/não é e número correspondente a quantia de minas ao seu redor
 typedef struct{
@@ -78,6 +78,10 @@ void initCampo(campo campo[lt][ct]){
         if(campo[lrand][crand].mina == 0){
             campo[lrand][crand].mina = 1;
             i++;
+            if((lrand == init1 && crand == init2) || quantbombas(init1, init2, campo)!=0){
+                campo[lrand][crand].mina = 0;
+                i--;
+            }
         }
     }
 
@@ -200,8 +204,42 @@ int revelar(int l, int c, campo campo[lt][ct]){
 
 //função que inicia a partida
 void initJogo(campo campo[lt][ct]){
-    int input1, input2;
+    int input1, input2, i, j, cont = 1;
 
+    printf("   ");
+    for(i=0;i<ct;i++){
+        if(i<10 && i==ct-1){
+            printf(" %d\n", i+1);
+        }else if(i==ct-1){
+            printf("%d\n", i+1);
+        }else if(i+1>=10){
+            printf("%d ", i+1);
+        }else{
+            printf(" %d ", i+1);
+        }
+    }
+    for(i=0;i<lt;i++){
+        if(cont<10){
+            printf(" %d", cont);
+        }else{
+            printf("%d", cont);
+        }
+        cont++;
+        
+            for(j=0;j<ct;j++){
+                    printf("|__");
+            }
+        printf("\n");
+    }
+  
+    scanf("%d %d", &init1, &init2);
+    init1--;
+    init2--;
+    
+    initCampo(campo);
+    revelar(init1, init2, campo);
+    wincheck(campo);
+  
     while(endgame==0){
         printar(campo);
         scanf("%d %d", &input1, &input2);
@@ -219,9 +257,9 @@ void initJogo(campo campo[lt][ct]){
 
 int main(){
     campo campo[lt][ct];
+    printf("Iniciando jogo...\n");
 
-    initCampo(campo);
     initJogo(campo);
-
+    
     return 0;
 }
