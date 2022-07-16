@@ -8,6 +8,9 @@ int endgame = 0, reveladas = 0;
 //Mude os números abaixos para alterar no programa inteiro
 int lt = 10, ct = 20, minas = 40, init1, init2;
 
+//TIMER
+time_t start,end;
+
 //índices do campo: status de aberto/fechado, status de é mina/não é e número correspondente a quantia de minas ao seu redor
 typedef struct{
     int status;
@@ -82,6 +85,13 @@ void initCampo(campo campo[lt][ct]){
                 campo[lrand][crand].mina = 0;
                 i--;
             }
+        }
+    }
+
+    //e por último transforma as casas que não viraram bombas em números correspondentes a quantidade de bombas vizinhas
+    for(i=0;i<lt;i++){
+        for(j=0;j<ct;j++){
+            campo[i][j].numero = quantbombas(i, j, campo);
         }
     }
 
@@ -237,6 +247,7 @@ void initJogo(campo campo[lt][ct]){
     init2--;
     
     initCampo(campo);
+    start = time(NULL);
     revelar(init1, init2, campo);
     wincheck(campo);
   
@@ -257,9 +268,10 @@ void initJogo(campo campo[lt][ct]){
 
 int main(){
     campo campo[lt][ct];
-    printf("Iniciando jogo...\n");
 
     initJogo(campo);
-    
+  
+    end = time(NULL);
+    printf("Tempo de jogo: %ld segundos", end - start);
     return 0;
 }
