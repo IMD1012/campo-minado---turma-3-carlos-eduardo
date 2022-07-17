@@ -3,11 +3,11 @@
 #include <time.h>
 
 // definição de algumas variáveis globais necessárias para o programa, NÃO MEXER
-int endgame = 0, reveladas = 0, init1, init2, modo = 2;
+int endgame = 0, reveladas = 0, init1, init2, modo = 1, automode = 0;
 time_t start,end;
 typedef struct{
-    int status; // status de aberto/fechado
-    int mina;   // status de é mina/não é
+    int status; // status de aberto(1)/fechado(0)
+    int mina;   // status de é mina(1)/não é(0)
     int numero; // número correspondente a quantia de minas ao redor da casa
 }campo;
 
@@ -50,6 +50,37 @@ int quantbombas(int l, int c, campo campo[lt][ct]){
         n++;
     }
     if(valid(l+1, c+1) && campo[l+1][c+1].mina==1){
+        n++;
+    }
+   return n;
+}
+
+// função que conta quantas casas ocultas existem ao redor de um determinado índice
+int quantOcult(int l, int c, campo campo[lt][ct]){
+    int n=0;
+    
+    if(valid(l-1, c-1) && campo[l-1][c-1].status==0){
+        n++;
+    }
+    if(valid(l-1, c) && campo[l-1][c].status==0){
+        n++;
+    }
+    if(valid(l-1, c+1) && campo[l-1][c+1].status==0){
+        n++;
+    }
+    if(valid(l, c-1) && campo[l][c-1].status==0){
+        n++;
+    }
+    if(valid(l, c+1) && campo[l][c+1].status==0){
+        n++;
+    }
+    if(valid(l+1, c-1) && campo[l+1][c-1].status==0){
+        n++;
+    }
+    if(valid(l+1, c) && campo[l+1][c].status==0){
+        n++;
+    }
+    if(valid(l+1, c+1) && campo[l+1][c+1].status==0){
         n++;
     }
    return n;
@@ -131,8 +162,6 @@ void printar(campo campo[lt][ct]){
             for(j=0;j<ct;j++){
                 if(campo[i][j].status == 0){
                     printf("|__");
-                }else if(campo[i][j].mina == 1){
-                    printf("|_X");
                 }else{
                     printf("|_%d", campo[i][j].numero);
                 }
@@ -180,8 +209,9 @@ int revelar(int l, int c, campo campo[lt][ct]){
         printar(campo);
         printf("GAME OVER! Voce acertou uma mina.\n");
         return 0;
-    }else if(campo[l][c].numero==0){ //
-        campo[l][c].status=1;
+    }else if(campo[l][c].numero==0){ // se o índice for vazio (0), ele é revelado e a função é aplicada em todas as 
+        campo[l][c].status=1;        // 8 casas vizinhas de forma recursiva
+
         if(valid(l-1, c-1) && campo[l-1][c-1].status==0){
             revelar(l-1, c-1, campo);
         }
@@ -208,6 +238,46 @@ int revelar(int l, int c, campo campo[lt][ct]){
         }
     }
     return 0;
+}
+
+// função que faz alguns cálculos e sugere uma casa com baixas chances de ser uma mina quando solicitada
+void sugerir_casa(campo campo[lt][ct]){
+    int menor = 8, maior = 1, sugl, sugc;
+    float chance = 100;
+    
+    // descobre qual a casa com a menor relação minas/casas ocultas
+    for(int i=0;i<lt;i++){
+        for(int j=0;j<ct;j++){
+            if(campo[i][j].status == 1 && campo[i][j].numero>0 && campo[i][j].numero<=menor && quantOcult(i, j, campo)>campo[i][j].numero && quantOcult(i, j, campo)>=maior && chance<=chance){
+                menor = campo[i][j].numero;
+                maior = quantOcult(i, j, campo);
+                chance = 100/quantOcult(i, j, campo)*campo[i][j].numero;
+                sugl = i;
+                sugc = j;
+            }
+        }
+    }
+    printf("%.1f %% de chance de mina ao redor da casa %dx%d.\n", chance, sugl+1, sugc+1);
+
+    // escolhe aleatoriamente uma casa oculta ao redor da casa escolhida para revelar
+    while(valid(sugl, sugc)==0 || campo[sugl][sugc].status==1){
+        int lrand = rand()%3+1;
+        int crand = rand()%3+1;
+
+        if(lrand==1){
+            sugl--;
+        }else if(lrand==3){
+            sugl++;
+        }
+
+        if(crand==1){
+         sugc--;
+        }else if(crand==3){
+         sugc++;
+        }
+    }
+
+    printf("tente na casa %dx%d!\n", sugl+1, sugc+1);
 }
 
 // função que inicia a partida
@@ -244,17 +314,19 @@ void initJogo(campo campo[lt][ct]){
   
     // pequeno loop para garantir que a primeira coordenada é válida
     scanf("%d %d", &init1, &init2);
+    init1--;
+    init2--;
     while(valid(init1, init2)==0){
         if(valid(input1, input2)==0){
             printf("Coordenada invalida!\n");
         }
         scanf("%d %d", &init1, &init2);
+        init1--;
+        init2--;
     }
-    init1--;
-    init2--;
     
     // com as primeiras coordenadas válidas, o campo é gerado, o tempo começa a contar e
-    // as primeiras casas são reveladas. (também ocorre um wincheck pois em alguns casos
+    // as primeiras casas são reveladas (também ocorre um wincheck pois em alguns casos
     // bem específicos o jogo pode ser ganho nesse primeiro clique)
     initCampo(campo);
     start = time(NULL);
@@ -270,7 +342,7 @@ void initJogo(campo campo[lt][ct]){
         printf("Digite:\n1 coordenadas\n2 tempo de jogo\n3 sugestão\n");
         scanf("%d", &menu);
         
-        if(menu == 1){
+        if(menu == 1){ // inserir coordenadas
             printf("Insira as coordenadas: ");
             scanf("%d %d", &input1, &input2);
             input1--;
@@ -282,12 +354,12 @@ void initJogo(campo campo[lt][ct]){
                 wincheck(campo);
             }
         }
-        else if (menu == 2) {
+        else if (menu == 2) { // consultar o tempo
             end = time(NULL);
             printf("Tempo de jogo: %ld segundos\n", end - start);
         }
-        else if (menu == 3){
-            //MODO DE SUGESTAO
+        else if (menu == 3){ // pedir sugestão ao jogo
+            sugerir_casa(campo);
         }
     }
 }
