@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <errno.h>
 
 #include "funcs.h"
 #include "definitions.h"
@@ -9,8 +10,12 @@
 // função que roda o menu e inicia o jogo/muda as configurações
 int main(){
 
+  time_t start,end;
+
+  int endgame = 0, reveladas = 0, init1, init2, modo = 1, automode = 0, rodada = 1;
+  
   int menu = 0, escolha = 0, input;
-  campo campo[lt][ct];
+  campo campo[10][20];
 
     // enquanto o jogador não sair do programa, ele fica no loop do menu inicial
     while(menu==0){
@@ -25,7 +30,7 @@ int main(){
 
       // opção do menu 1: inicia o jogo com as configurações atuais e pergunta se quer iniciar novamente ao acabar
       while(menu==1){
-        initJogo(campo);
+        initJogo(campo, start, end, reveladas, endgame, automode, init1, init2, modo);
         printf("Iniciar novamente?\n1: Sim 2: Nao\n");
         scanf("%d", &escolha);
 
@@ -35,7 +40,7 @@ int main(){
           scanf("%d", &escolha);
         }
         
-        // se não, volta ao menu
+        // se não, vo10a ao menu
         if(escolha==2){
           menu = 0;
           escolha = 0;
@@ -46,7 +51,7 @@ int main(){
       while(menu==2){
         
         // imprime as configurações atuais
-        printf("\nConfiguracoes atuais:\nCampo %dx%d com %d minas\n", lt, ct, minas);
+        printf("\nConfiguracoes atuais:\nCampo %dx%d com %d minas\n", 10, 20, 40);
         if(modo==1){
             printf("Modo: Sempre iniciar com casa vazia\n");
         }else{
@@ -59,7 +64,7 @@ int main(){
         }
 
         // opções de mudança de configurações
-        printf("1: Mudar tamanho do campo\n2: Mudar numero de minas\n3: Mudar modo\n4: Ligar/desligar automode\n5: Voltar\n");
+        printf("1: Mudar tamanho do campo\n2: Mudar numero de minas\n3: Mudar modo\n4: Ligar/desligar automode\n5: Vo10ar\n");
         scanf("%d", &escolha);
 
         // loop de controle para garantir um comando válido
@@ -68,36 +73,10 @@ int main(){
             scanf("%d", &escolha);
         }
         
-        if(escolha==1){ // 1: muda o tamanho do campo
-            int input1, input2;
-            printf("Escolha o novo tamanho do campo:\n");
-            scanf("%d %d", &input1, &input2);
-
-            // tratamento para que o tamanho do campo seja válido
-            if(input1<2 || input2<2 || input1*input2>200){
-                printf("\nTamanho de campo invalido. O campo tem que ser ao menos 2x2 e com no maximo 200 casas.\n");
-            }else if(input1*input2<minas){
-                printf("\nTamanho de campo invalido. O numero total de casas e menor que o numero de minas.\n");
-            }else if(input1*input2<5 && modo==1){
-                printf("\nTamanho de campo invalido. O campo nao pode ter menos que 9 casas se o modo de jogo for \"Sempre iniciar com casa vazia\". \n");
-            }else{
-                lt = input1;
-                ct = input2;
-            }
-        }else if(escolha==2){ // 2: muda o número de minas
-            printf("Escolha o novo numero de minas:\n");
-            scanf("%d", &input);
-
-            // tratamento para que o número de minas seja válido
-            if(input<lt*ct){
-                minas = input;
-            }else{
-                printf("\nNumero de minas invalido! Cheque o tamanho do campo.\n");
-            }
-        }else if(escolha==3){ // 3: alterna o modo de jogo entre 1(começar com 0) e 2(começar com número)
+        if(escolha==3){ // 3: alterna o modo de jogo entre 1(começar com 0) e 2(começar com número)
           if(modo==1){
             modo = 2;
-          }else if(modo==2 && lt*ct<5){
+          }else if(modo==2 && 10*20<5){
             printf("\nNao e possivel trocar de modo pois o campo nao tem o tamanho minimo (9 casas).\n");
           }else if(modo==2){
             modo = 1;

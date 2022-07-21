@@ -6,8 +6,8 @@
 
 
 int valid(int, int);
-int quantbombas(int, int, campo[lt][ct]);
-int quantOcult(int, int, campo[lt][ct]);
-int revelar(int, int, campo[lt][ct]);
+int quantbombas(int, int, campo[10][20]);
+int quantOcult(int, int, campo[10][20]);
+int revelar(int, int, campo[10][20], int, int);
 
 #endif

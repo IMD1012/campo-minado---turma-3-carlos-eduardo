@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <errno.h>
 
 #include "funcs.h"
 #include "definitions.h"
@@ -8,7 +9,7 @@
 
 // função que checa se um índice chamado está dentro do campo
 int valid(int l, int c){
-    if(l>=0 && l<lt && c>=0 && c<ct){
+    if(l>=0 && l<10 && c>=0 && c<20){
         return 1;
     }else{
         return 0;
@@ -16,7 +17,7 @@ int valid(int l, int c){
 }
 
 // função que conta e retorna quantas bombas há nas 8 casas ao redor de um determinado índice
-int quantbombas(int l, int c, campo campo[lt][ct]){
+int quantbombas(int l, int c, campo campo[10][20]){
     int n=0;
     
     if(valid(l-1, c-1) && campo[l-1][c-1].mina==1){
@@ -47,7 +48,7 @@ int quantbombas(int l, int c, campo campo[lt][ct]){
 }
 
 // função que conta quantas casas ocultas existem ao redor de um determinado índice
-int quantOcult(int l, int c, campo campo[lt][ct]){
+int quantOcult(int l, int c, campo campo[10][20]){
     int n=0;
     
     if(valid(l-1, c-1) && campo[l-1][c-1].status==0){
@@ -78,7 +79,7 @@ int quantOcult(int l, int c, campo campo[lt][ct]){
 }
 
 // função que recebe o input de linha/coluna e altera o campo
-int revelar(int l, int c, campo campo[lt][ct]){
+int revelar(int l, int c, campo campo[10][20], int reveladas, int endgame){
 
     // se o campo não estiver revelado ainda e a casa do indicada não for uma bomba, o contador de casas reveladas aumenta, se não, nada acontece 
     if(campo[l][c].status==0 && campo[l][c].mina!=1){
@@ -93,35 +94,35 @@ int revelar(int l, int c, campo campo[lt][ct]){
     }else if(campo[l][c].mina==1){ // se o índice for uma mina, ela é revelada e o jogo acaba
         campo[l][c].status=1;
         endgame = 1;
-        printar(*campo);
+        printar(campo, endgame);
         printf("GAME OVER! Voce acertou uma mina.\n");
         return 0;
     }else if(campo[l][c].numero==0){ // se o índice for vazio (0), ele é revelado e a função é aplicada em todas as 
         campo[l][c].status=1;        // 8 casas vizinhas de forma recursiva
 
         if(valid(l-1, c-1) && campo[l-1][c-1].status==0){
-            revelar(l-1, c-1, campo);
+            revelar(l-1, c-1, campo, reveladas, endgame);
         }
         if(valid(l-1, c) && campo[l-1][c].status==0){
-            revelar(l-1, c, campo);
+            revelar(l-1, c, campo, reveladas, endgame);
         }
         if(valid(l-1, c+1) && campo[l-1][c+1].status==0){
-            revelar(l-1, c+1, campo);
+            revelar(l-1, c+1, campo, reveladas, endgame);
         }
         if(valid(l, c-1) && campo[l][c-1].status==0){
-            revelar(l, c-1, campo);
+            revelar(l, c-1, campo, reveladas, endgame);
         }
         if(valid(l, c+1) && campo[l][c+1].status==0){
-            revelar(l, c+1, campo);
+            revelar(l, c+1, campo, reveladas, endgame);
         }
         if(valid(l+1, c-1) && campo[l+1][c-1].status==0){
-            revelar(l+1, c-1, campo);
+            revelar(l+1, c-1, campo, reveladas, endgame);
         }
         if(valid(l+1, c) && campo[l+1][c].status==0){
-            revelar(l+1, c, campo);
+            revelar(l+1, c, campo, reveladas, endgame);
         }
         if(valid(l+1, c+1) && campo[l+1][c+1].status==0){
-            revelar(l+1, c+1, campo);
+            revelar(l+1, c+1, campo, reveladas, endgame);
         }
     }
     return 0;
