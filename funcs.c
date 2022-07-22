@@ -7,7 +7,6 @@
 #include "definitions.h"
 #include "io.h"
 
-// função que checa se um índice chamado está dentro do campo
 int valid(int l, int c){
     if(l>=0 && l<10 && c>=0 && c<20){
         return 1;
@@ -16,7 +15,6 @@ int valid(int l, int c){
     }
 }
 
-// função que conta e retorna quantas bombas há nas 8 casas ao redor de um determinado índice
 int quantbombas(int l, int c, campo campo[10][20]){
     int n=0;
     
@@ -47,7 +45,6 @@ int quantbombas(int l, int c, campo campo[10][20]){
    return n;
 }
 
-// função que conta quantas casas ocultas existem ao redor de um determinado índice
 int quantOcult(int l, int c, campo campo[10][20]){
     int n=0;
     
@@ -78,27 +75,25 @@ int quantOcult(int l, int c, campo campo[10][20]){
    return n;
 }
 
-// função que recebe o input de linha/coluna e altera o campo
 int revelar(int l, int c, campo campo[10][20], int reveladas, int endgame){
-
-    // se o campo não estiver revelado ainda e a casa do indicada não for uma bomba, o contador de casas reveladas aumenta, se não, nada acontece 
+ 
     if(campo[l][c].status==0 && campo[l][c].mina!=1){
         reveladas++;
     }else if(campo[l][c].status==1){
         printf("Coordenada ja revelada.\n");
     }
 
-    if(campo[l][c].numero!=0 && campo[l][c].mina==0){ // se o índice for um número, somente ele é revelado
+    if(campo[l][c].numero!=0 && campo[l][c].mina==0){
         campo[l][c].status=1;
         return 0;
-    }else if(campo[l][c].mina==1){ // se o índice for uma mina, ela é revelada e o jogo acaba
+    }else if(campo[l][c].mina==1){
         campo[l][c].status=1;
         endgame = 1;
         printar(campo, endgame);
         printf("GAME OVER! Voce acertou uma mina.\n");
         return 0;
-    }else if(campo[l][c].numero==0){ // se o índice for vazio (0), ele é revelado e a função é aplicada em todas as 
-        campo[l][c].status=1;        // 8 casas vizinhas de forma recursiva
+    }else if(campo[l][c].numero==0){ 
+        campo[l][c].status=1;
 
         if(valid(l-1, c-1) && campo[l-1][c-1].status==0){
             revelar(l-1, c-1, campo, reveladas, endgame);

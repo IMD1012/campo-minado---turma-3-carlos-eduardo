@@ -7,7 +7,6 @@
 #include "definitions.h"
 #include "io.h"
 
-// função que roda o menu e inicia o jogo/muda as configurações
 int main(){
 
   time_t start,end;
@@ -17,40 +16,33 @@ int main(){
   int menu = 0, escolha = 0, input;
   campo campo[10][20];
 
-    // enquanto o jogador não sair do programa, ele fica no loop do menu inicial
     while(menu==0){
       printf("\n(C)ampo Minado\n\n1: Iniciar Jogo\n2: Configuracoes\n3: Sair\n");
       scanf("%d", &menu);
 
-      // loop de controle para garantir um comando válido
       while(menu!=1 && menu!=2 && menu!=3){
         printf("\nOpcao invalida. Tente novamente.\n");
         scanf("%d", &menu);
       }
 
-      // opção do menu 1: inicia o jogo com as configurações atuais e pergunta se quer iniciar novamente ao acabar
       while(menu==1){
         initJogo(campo, start, end, reveladas, endgame, automode, init1, init2, modo);
         printf("Iniciar novamente?\n1: Sim 2: Nao\n");
         scanf("%d", &escolha);
 
-        // loop de controle para garantir um comando válido
         while(escolha!=1 && escolha!=2){
           printf("\nOpcao invalida. Tente novamente.\n");
           scanf("%d", &escolha);
         }
         
-        // se não, vo10a ao menu
         if(escolha==2){
           menu = 0;
           escolha = 0;
         }
       }
 
-      // opção do menu 2: acessa as configurações
       while(menu==2){
         
-        // imprime as configurações atuais
         printf("\nConfiguracoes atuais:\nCampo %dx%d com %d minas\n", 10, 20, 40);
         if(modo==1){
             printf("Modo: Sempre iniciar com casa vazia\n");
@@ -63,17 +55,15 @@ int main(){
             printf("Modo automatico: ON\n");
         }
 
-        // opções de mudança de configurações
         printf("1: Mudar tamanho do campo\n2: Mudar numero de minas\n3: Mudar modo\n4: Ligar/desligar automode\n5: Vo10ar\n");
         scanf("%d", &escolha);
 
-        // loop de controle para garantir um comando válido
         while(escolha!= 1 && escolha!= 2 && escolha!= 3 && escolha!= 4 && escolha!= 5){
             printf("\nOpcao invalida. Tente novamente.\n");
             scanf("%d", &escolha);
         }
         
-        if(escolha==3){ // 3: alterna o modo de jogo entre 1(começar com 0) e 2(começar com número)
+        if(escolha==3){
           if(modo==1){
             modo = 2;
           }else if(modo==2 && 10*20<5){
@@ -81,18 +71,17 @@ int main(){
           }else if(modo==2){
             modo = 1;
           }
-        }else if(escolha==4){ // 4: alterna o modo autómatico entre ligado e desligado
+        }else if(escolha==4){ 
           if(automode==0){
             automode = 1;
           }else if(automode==1){
             automode = 0;
           }
-        }else if(escolha==5){ // 5: volta pro menu inicial
+        }else if(escolha==5){
           menu = 0;
         }
       }
         
     }
-    // opção do menu 3: o loop do menu se encerra e o jogo fecha
     return 0;
 }
